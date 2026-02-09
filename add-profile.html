@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student - SMK CERIA HEALTH CARE</title>
+    <style>
+        /* Using the same modern styles from your other files */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        .edit-container {
+            background-color: white;
+            padding: 40px;
+            width: 420px;
+            border-radius: 20px;
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            margin: 0 0 25px 0;
+            font-size: 20px;
+            color: #10b981; /* Green for "Add" mode */
+            border-bottom: 2px solid #10b981;
+            padding-bottom: 10px;
+        }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #475569; font-size: 14px; }
+        input { width: 100%; box-sizing: border-box; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 12px; font-size: 15px; outline: none; }
+        input:focus { border-color: #10b981; }
+        input[type="file"] { padding: 8px; background-color: #f8fafc; font-size: 12px; }
+        hr { border: 0; border-top: 1.5px solid #e2e8f0; margin: 25px 0; }
+
+        .button-container { display: flex; gap: 15px; margin-top: 30px; }
+        button { flex: 1; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s; }
+        .btn-cancel { background-color: #94a3b8; color: white; }
+        .btn-save { background-color: #10b981; color: white; }
+        button:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+
+    <div class="edit-container">
+        <div class="header-title">SMK CERIA HEALTH CARE</div>
+        <h2>Add New Student</h2>
+        
+        <div class="input-group">
+            <label>Student Name</label>
+            <input type="text" id="add-name" placeholder="Full Name">
+        </div>
+
+        <div class="input-group">
+            <label>Student Class</label>
+            <input type="text" id="add-class" placeholder="e.g. 5A">
+        </div>
+
+        <div class="input-group">
+            <label>Student Photo</label>
+            <input type="file" id="add-pic-student" accept="image/*">
+        </div>
+
+        <div class="input-group">
+            <label>Medical History</label>
+            <input type="text" id="add-history" placeholder="Any past illnesses?">
+        </div>
+
+        <div class="input-group">
+            <label>Allergy</label>
+            <input type="text" id="add-allergy" placeholder="Food or medicine allergies">
+        </div>
+
+        <hr>
+
+        <div class="input-group">
+            <label>Parent Name</label>
+            <input type="text" id="add-parent-name" placeholder="Guardian Name">
+        </div>
+
+        <div class="input-group">
+            <label>Parent Phone Number</label>
+            <input type="text" id="add-parent-phone" placeholder="e.g. 012-3456789">
+        </div>
+
+        <div class="input-group">
+            <label>Parent Photo</label>
+            <input type="file" id="add-pic-parent" accept="image/*">
+        </div>
+        
+        <div class="button-container">
+            <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
+            <button class="btn-save" onclick="addNewStudent()">Save Student</button>
+        </div>
+    </div>
+
+    <script>
+        const toBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        async function addNewStudent() {
+            // 1. Get current list
+            let studentList = JSON.parse(localStorage.getItem('allStudents')) || [];
+
+            // 2. Prepare data
+            const newStudent = {
+                name: document.getElementById('add-name').value,
+                class: document.getElementById('add-class').value,
+                history: document.getElementById('add-history').value,
+                allergy: document.getElementById('add-allergy').value,
+                parentName: document.getElementById('add-parent-name').value,
+                parentPhone: document.getElementById('add-parent-phone').value,
+                studentPic: "",
+                parentPic: ""
+            };
+
+            // 3. Simple validation
+            if (!newStudent.name) {
+                alert("Please enter a name.");
+                return;
+            }
+
+            // 4. Handle Images
+            const sFile = document.getElementById('add-pic-student').files[0];
+            if (sFile) newStudent.studentPic = await toBase64(sFile);
+
+            const pFile = document.getElementById('add-pic-parent').files[0];
+            if (pFile) newStudent.parentPic = await toBase64(pFile);
+
+            // 5. Push to list and save
+            studentList.push(newStudent);
+            localStorage.setItem('allStudents', JSON.stringify(studentList));
+            localStorage.setItem('currentStudentName', newStudent.name);
+
+            alert("New student added successfully!");
+            window.location.href = 'student-profile.html';
+        }
+    </script>
+</body>
+</html>
