@@ -137,6 +137,18 @@
 
         /* Removed btn-emergency styles */
         .btn-camera:hover { background-color: #f0fdf4; border-color: #22c55e; }
+
+        /* Red Reset Button Style */
+        .btn-reset {
+            color: #ef4444 !important;
+            border-color: #fca5a5 !important;
+        }
+
+        .btn-reset:hover {
+            background-color: #fef2f2 !important;
+            border-color: #ef4444 !important;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -155,10 +167,12 @@
         <div id="results-area"></div>
 
         <div class="action-bar">
-            <a href="add-profile.html" class="icon-btn" data-tooltip="Add Student Profile">🟢➕</a>
+            <a href="add-profile.html" class="icon-btn" data-tooltip="Add Student Profile">➕</a>
             
-            <div style="display: flex; gap: 10px;">
-                <a href="camera-test.html" class="icon-btn btn-camera" data-tooltip="Camera Test">👨‍⚕️📷</a>
+            <a href="reset.html" class="icon-btn btn-reset" data-tooltip="Erase all data (Temporary)">🗑️</a>
+            
+            <div style="display: flex; gap: 8px;">
+                <a href="camera.html" class="icon-btn btn-camera" data-tooltip="Camera Test">👨‍⚕️📷</a>
             </div>
         </div>
     </div>
