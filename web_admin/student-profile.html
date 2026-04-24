@@ -79,7 +79,7 @@
         </div>
 
         <div class="action-bar">
-            <a href="index.html" class="icon-btn" data-tooltip="Back to Main Menu">⏪</a>
+            <a href="dashboard.html" class="icon-btn" data-tooltip="Back to Main Menu">⏪</a>
             <div style="display: flex; gap: 8px;">
                 <div class="icon-btn btn-call" data-tooltip="Call Parents" onclick="callParent()">📞👪</div>
                 <div class="icon-btn btn-emergency" data-tooltip="Emergency Call" onclick="triggerEmergency()">📞🚨</div>
@@ -99,62 +99,99 @@
         </div>
     </div>
     
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+
     <script>
-        window.onload = function() {
+
+        // The Security Guard
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            alert("Unauthorized Access! Please log in first.");
+            window.location.href = 'index.html';
+        }
+
+        // 2. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRTIjVzxF25XURIqR6kx8TYJXFTXmqeMU",
+            authDomain: "health-care-c5fe3.firebaseapp.com",
+            projectId: "health-care-c5fe3",
+            storageBucket: "health-care-c5fe3.firebasestorage.app",
+            messagingSenderId: "104419019360",
+            appId: "1:104419019360:web:fbd745b50a3d65d7d65105",
+            measurementId: "G-MBETSFCGR3"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Variable to store the student data globally for this page
+        let currentStudentData = null;
+
+        window.onload = async function() {
             const targetName = localStorage.getItem('currentStudentName');
-            const studentList = JSON.parse(localStorage.getItem('allStudents')) || [];
-            const student = studentList.find(s => s.name === targetName);
+            
+            if (!targetName) {
+                alert("No student selected. Returning to dashboard.");
+                window.location.href = 'dashboard.html';
+                return;
+            }
 
-            if (student) {
-                document.getElementById('display-name').innerText = student.name;
-                document.getElementById('display-title-name').innerText = student.name;
-                document.getElementById('display-class').innerText = student.class;
-                document.getElementById('display-ic').innerText = student.icNumber || "-";
-                document.getElementById('display-history').innerText = student.history;
-                document.getElementById('display-allergy').innerText = student.allergy;
+            try {
+                // --- FIREBASE FETCH ---
+                const doc = await db.collection("students").doc(targetName).get();
 
-                if (student.studentPic) {
-                    document.getElementById('student-img-display').src = student.studentPic;
-                    document.getElementById('student-img-display').style.display = "block";
-                    document.getElementById('student-emoji-default').style.display = "none";
-                }
+                if (doc.exists) {
+                    currentStudentData = doc.data();
+                    const student = currentStudentData;
 
-                // Load Parent 1
-                if(student.parents && student.parents[0]) {
-                    const p1 = student.parents[0];
-                    document.getElementById('p1-name').innerText = p1.name;
-                    document.getElementById('p1-phone').innerText = p1.phone;
-                    document.getElementById('p1-ic').innerText = p1.ic || "-";
-                    document.getElementById('p1-rel').innerText = p1.rel || "Guardian";
-                    if(p1.pic) {
-                        document.getElementById('p1-img-display').src = p1.pic;
-                        document.getElementById('p1-img-display').style.display = "block";
-                        document.getElementById('p1-emoji').style.display = "none";
+                    // Fill UI Details
+                    document.getElementById('display-name').innerText = student.name;
+                    document.getElementById('display-title-name').innerText = student.name;
+                    document.getElementById('display-class').innerText = student.class;
+                    document.getElementById('display-ic').innerText = student.icNumber || "-";
+                    document.getElementById('display-history').innerText = student.history;
+                    document.getElementById('display-allergy').innerText = student.allergy;
+
+                    // Load Student Image
+                    if (student.studentPic) {
+                        document.getElementById('student-img-display').src = student.studentPic;
+                        document.getElementById('student-img-display').style.display = "block";
+                        document.getElementById('student-emoji-default').style.display = "none";
                     }
-                }
 
-                // Load Parent 2
-                if(student.parents && student.parents[1]) {
-                    const p2 = student.parents[1];
-                    document.getElementById('p2-name').innerText = p2.name;
-                    document.getElementById('p2-phone').innerText = p2.phone;
-                    document.getElementById('p2-ic').innerText = p2.ic || "-";
-                    document.getElementById('p2-rel').innerText = p2.rel || "Guardian";
-                    if(p2.pic) {
-                        document.getElementById('p2-img-display').src = p2.pic;
-                        document.getElementById('p2-img-display').style.display = "block";
-                        document.getElementById('p2-emoji').style.display = "none";
+                    // Load Parents from the Array in Firebase
+                    if(student.parents) {
+                        student.parents.forEach((parent, index) => {
+                            const num = index + 1;
+                            const nameEl = document.getElementById(`p${num}-name`);
+                            if(nameEl) {
+                                nameEl.innerText = parent.name || "N/A";
+                                document.getElementById(`p${num}-phone`).innerText = parent.phone || "N/A";
+                                document.getElementById(`p${num}-ic`).innerText = parent.ic || "-";
+                                document.getElementById(`p${num}-rel`).innerText = parent.rel || "Guardian";
+                                
+                                if(parent.pic) {
+                                    const imgEl = document.getElementById(`p${num}-img-display`);
+                                    const emojiEl = document.getElementById(`p${num}-emoji`);
+                                    imgEl.src = parent.pic;
+                                    imgEl.style.display = "block";
+                                    emojiEl.style.display = "none";
+                                }
+                            }
+                        });
                     }
+                } else {
+                    alert("Student not found in Cloud Database.");
                 }
+            } catch (error) {
+                console.error("Error loading profile:", error);
+                alert("Failed to load profile from Cloud.");
             }
         };
 
         function openSelectionModal(title, isEmergency) {
-            const targetName = localStorage.getItem('currentStudentName');
-            const studentList = JSON.parse(localStorage.getItem('allStudents')) || [];
-            const student = studentList.find(s => s.name === targetName);
-            
-            if(!student || !student.parents) return;
+            if(!currentStudentData || !currentStudentData.parents) return;
 
             const modal = document.getElementById('call-modal');
             const titleEl = document.getElementById('modal-title');
@@ -168,27 +205,24 @@
                 descEl.style.display = "block";
                 descEl.innerText = "This will notify emergency services and alert both guardians immediately.";
                 
-                // EMERGENCY MODE: Only Hospital Button
                 const hospitalBtn = document.createElement('button');
                 hospitalBtn.style.cssText = "padding:15px; border-radius:12px; border:none; background:#ef4444; color:white; font-weight:bold; cursor:pointer; font-size:16px;";
                 hospitalBtn.innerText = "🏥 Call Hospital (999)";
                 hospitalBtn.onclick = () => {
-                    let msg = "🚨 Calling Hospital...\n\n✅ SMS Alert sent to: " + (student.parents[0].name || "Guardian");
-                    if(student.parents[1] && student.parents[1].name) msg += " & " + student.parents[1].name;
+                    let msg = "🚨 Calling Hospital...\n\n✅ SMS Alert sent to: " + (currentStudentData.parents[0].name || "Guardian");
+                    if(currentStudentData.parents[1] && currentStudentData.parents[1].name) msg += " & " + currentStudentData.parents[1].name;
                     alert(msg);
                     closeModal();
                 };
                 btnContainer.appendChild(hospitalBtn);
             } else {
-                // CALL MODE: Show Parents with Relationships
                 descEl.style.display = "none";
-                student.parents.forEach((parent) => {
+                currentStudentData.parents.forEach((parent) => {
                     if(parent.name) {
                         const btn = document.createElement('button');
                         const color = "#3b82f6";
                         btn.style.cssText = `padding:12px; border-radius:10px; border:1.5px solid ${color}; background:white; color:${color}; font-weight:bold; cursor:pointer;`;
                         
-                        // Added relationship in brackets
                         const relation = parent.rel ? ` (${parent.rel})` : "";
                         btn.innerText = `📞 Call ${parent.name}${relation}`;
                         
@@ -200,7 +234,6 @@
                     }
                 });
             }
-
             modal.style.display = 'flex';
         }
 
