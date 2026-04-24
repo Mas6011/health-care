@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SMK CERIA HEALTH CARE</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+
+        .dashboard-container {
+            background-color: white;
+            padding: 30px;
+            width: 500px;
+            border-radius: 20px;
+            border: 2px solid #cbd5e1;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .header-title { font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 5px; }
+
+        h2 {
+            margin-top: 0;
+            font-size: 20px;
+            color: #3b82f6; /* Keeping your blue theme */
+            border-bottom: 2px solid #3b82f6;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
+        }
+
+        .search-section { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 16px;
+            outline: none;
+        }
+
+        /* Your specific magnifying glass button style */
+        .btn-search {
+            padding: 12px 20px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .results-area { min-height: 80px; margin-bottom: 30px; }
+
+        .result-card {
+            padding: 15px;
+            border-radius: 15px;
+            border: 1.5px solid #3b82f6;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        /* New Bottom Navigation Styling */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .left-group { display: flex; gap: 10px; }
+
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            background: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.2s;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .icon-btn:hover {
+            background-color: #f8fafc;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        /* Tooltip Logic */
+        .icon-btn:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 60px;
+            background: #1e293b;
+            color: white;
+            font-size: 11px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
+
+        /* Logout Modal Styling */
+        #logout-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
+        }
+
+        .modal-content {
+            background: white; padding: 25px; border-radius: 20px;
+            text-align: center; width: 300px;
+        }
+
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btns button { flex: 1; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .confirm-logout { background: #ef4444; color: white; }
+        .cancel-logout { background: #f1f5f9; color: #64748b; }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="header-title">SMK CERIA HEALTH CARE</div>
+        <h2>Staff Dashboard</h2>
+
+        <div class="search-section">
+            <label>Find Student by Name</label>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Enter student name...">
+                <button class="btn-search" onclick="showResult()">🔍</button>
+            </div>
+        </div>
+
+        <div class="results-area" id="results-area">
+            </div>
+
+        <div class="bottom-nav">
+            <div class="left-group">
+                <a href="add-profile.html" class="icon-btn" data-tooltip="Add New Student">➕</a>
+                <a href="camera-test.html" class="icon-btn" data-tooltip="Test Scanner">📷</a>
+            </div>
+            
+            <button class="icon-btn btn-logout" data-tooltip="Log Out" onclick="showLogoutModal()">🚪</button>
+        </div>
+    </div>
+
+    <div id="logout-modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0">Log Out?</h3>
+            <p style="color:#64748b; font-size:14px">Are you sure you want to end your session?</p>
+            <div class="modal-btns">
+                <button class="cancel-logout" onclick="closeLogoutModal()">Cancel</button>
+                <button class="confirm-logout" onclick="processLogout()">Log Out</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // The Security Guard
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            alert("Unauthorized Access! Please log in first.");
+            window.location.href = 'index.html';
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRTIjVzxF25XURIqR6kx8TYJXFTXmqeMU",
+            authDomain: "health-care-c5fe3.firebaseapp.com",
+            projectId: "health-care-c5fe3",
+            storageBucket: "health-care-c5fe3.firebasestorage.app",
+            messagingSenderId: "104419019360",
+            appId: "1:104419019360:web:fbd745b50a3d65d7d65105"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function showResult() {
+            const query = document.getElementById('searchInput').value.trim();
+            const resultsArea = document.getElementById('results-area');
+            if (!query) return;
+
+            resultsArea.innerHTML = "Searching...";
+
+            try {
+                const doc = await db.collection("students").doc(query).get();
+                if (doc.exists) {
+                    const student = doc.data();
+                    localStorage.setItem('currentStudentName', student.name);
+                    resultsArea.innerHTML = `
+                        <a href="student-profile.html" style="text-decoration: none; display: block;">
+                            <div class="result-card" style="cursor: pointer; background-color: #dcfce7; border-color: #22c55e;">
+                                <span>Name: ${student.name}</span>
+                                <span>Class: ${student.class}</span>
+                            </div>
+                        </a>
+                    `;
+                } else {
+                    resultsArea.innerHTML = `<div class="result-card" style="background:#f1f5f9; border-color:#cbd5e1; color:#64748b;"><span>No student found.</span></div>`;
+                }
+            } catch (e) {
+                resultsArea.innerHTML = "Error searching connection.";
+            }
+        }
+
+        function showLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
+        function closeLogoutModal() { document.getElementById('logout-modal').style.display = 'none'; }
+        
+        function processLogout() {
+            firebase.auth().signOut().then(() => {
+                localStorage.removeItem('isLoggedIn');
+                window.location.href = 'index.html';
+            });
+        }
+    </script>
+</body>
+</html>
