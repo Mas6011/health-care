@@ -24,8 +24,6 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); 
         }
 
-        .header-title { font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 5px; }
-        
         h2 { 
             margin: 0 0 25px 0; 
             font-size: 20px; 
@@ -34,244 +32,179 @@
             padding-bottom: 10px; 
         }
 
-        .form-group { margin-bottom: 15px; }
-
-        label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-size: 14px; 
-            font-weight: bold; 
-            color: #475569; 
-        }
-
-        input { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1.5px solid #cbd5e1; 
-            border-radius: 12px; 
-            box-sizing: border-box; 
-            font-size: 14px; 
-            transition: border-color 0.2s;
-        }
-
-        input:focus { outline: none; border-color: #3b82f6; }
-
-        /* Time Selection Group */
-        .time-input-container {
-            display: flex;
-            gap: 10px;
-        }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 14px; font-weight: bold; color: #64748b; margin-bottom: 8px; }
         
-        .btn-time-option {
-            background: white;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 12px;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: all 0.2s;
+        input { 
+            width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #cbd5e1; 
+            box-sizing: border-box; font-size: 16px; outline: none; transition: 0.2s;
         }
 
-        .btn-time-option:hover { border-color: #3b82f6; background-color: #eff6ff; }
+        input:focus { border-color: #3b82f6; background-color: #f8fafc; }
 
-        /* Footer Actions */
-        .footer-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
+        .btn-save { 
+            width: 100%; padding: 14px; background-color: #3b82f6; color: white; border: none; 
+            border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
         }
 
-        .icon-btn {
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            width: 70px;
-            height: 55px;
-            border: 2px solid #cbd5e1;
-            background-color: white;
-            border-radius: 12px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-            text-decoration: none;
-            color: black;
-            font-size: 24px;
+        .btn-save:hover { background-color: #2563eb; transform: translateY(-2px); }
+
+        /* FIXED MODAL STYLING */
+        #time-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); display: none; justify-content: center;
+            align-items: center; z-index: 9999; /* Higher Z-index to be clickable */
         }
 
-        .icon-btn:hover {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-            transform: translateY(-3px);
+        .modal-content {
+            background: white; padding: 30px; border-radius: 20px; width: 320px;
+            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
-
-        /* Tooltip logic */
-        .icon-btn::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 65px;
-            background-color: #1e293b;
-            color: white;
-            font-size: 12px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-
-        .icon-btn:hover::after { opacity: 1; }
-
-        /* Modal Style (Same as Calling Popup) */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-box {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            width: 320px;
-            text-align: center;
-            border: 2px solid #cbd5e1;
-        }
-
-        .modal-box h3 { margin-top: 0; color: #1e293b; font-size: 18px; }
 
         .modal-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1.5px solid #3b82f6;
-            background: white;
-            color: #3b82f6;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 100%; padding: 12px; margin: 8px 0; border-radius: 10px; border: none;
+            font-weight: bold; cursor: pointer; font-size: 15px;
         }
-
-        .modal-btn:hover { background: #eff6ff; }
-        .modal-btn.secondary { border-color: #64748b; color: #64748b; }
+        .btn-auto { background: #3b82f6; color: white; }
+        .btn-manual { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
     </style>
 </head>
 <body>
 
-<div class="form-container">
-    <div class="header-title">SMK CERIA HEALTH CARE</div>
-    <h2 id="studentHeading">Add Medication Record</h2>
+    <div class="form-container">
+        <div style="font-size: 14px; color: #64748b; margin-bottom: 5px;">Medicine Log For:</div>
+        <h2 id="display-name">Loading...</h2>
 
-    <div class="form-group">
-        <label>Date</label>
-        <input type="date" id="med-date">
+        <div class="input-group">
+            <label>Date</label>
+            <input type="date" id="med-date">
+        </div>
+
+        <div class="input-group">
+            <label>Time</label>
+            <input type="text" id="med-time" placeholder="Tap to select time" readonly onclick="openTimeModal()">
+        </div>
+
+        <div class="input-group">
+            <label>Medicine Name</label>
+            <input type="text" id="med-name" placeholder="e.g. Paracetamol">
+        </div>
+
+        <div class="input-group">
+            <label>Amount / Dosage</label>
+            <input type="text" id="med-amount" placeholder="e.g. 2 Tablets">
+        </div>
+
+        <button class="btn-save" onclick="saveRecord()">Save Record</button>
+        <button onclick="window.history.back()" style="width:100%; background:none; border:none; color:#64748b; margin-top:15px; cursor:pointer;">Cancel</button>
     </div>
 
-    <div class="form-group">
-        <label>Time</label>
-        <div class="time-input-container">
-            <input type="text" id="med-time" placeholder="HH:MM" readonly>
-            <button class="btn-time-option" onclick="openTimeModal()" title="Select Time Mode">🕒</button>
+    <div id="time-modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">Select Time</h3>
+            <button class="modal-btn btn-auto" onclick="setCurrentTime()">Set to Current Time</button>
+            <button class="modal-btn btn-manual" onclick="setManualTime()">Type Manually</button>
+            <button onclick="closeModal()" style="background:none; border:none; color:#94a3b8; margin-top:10px; cursor:pointer;">Close</button>
         </div>
     </div>
 
-    <div class="form-group">
-        <label>Medicine Taken</label>
-        <input type="text" id="med-name" placeholder="e.g. Paracetamol">
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
 
-    <div class="form-group">
-        <label>Number of Meds / Dosage</label>
-        <input type="text" id="med-amount" placeholder="e.g. 2 tablets / 10ml">
-    </div>
-
-    <div class="footer-actions">
-        <a href="records.html" class="icon-btn" data-tooltip="Back to records">⏪</a>
-        <button class="icon-btn" data-tooltip="Add record" onclick="saveRecord()">➕</button>
-    </div>
-</div>
-
-<div class="modal-overlay" id="timeModal">
-    <div class="modal-box">
-        <h3>Select Time Option</h3>
-        <button class="modal-btn" onclick="setAutoTime()">⏱️ Use System Time</button>
-        <button class="modal-btn" onclick="setManualTime()">⌨️ Type Manually</button>
-        <button class="modal-btn secondary" onclick="closeModal()">Cancel</button>
-    </div>
-</div>
-
-<script>
-    // Set default date to today
-    document.getElementById('med-date').valueAsDate = new Date();
-
-    const currentStudent = localStorage.getItem('currentStudentName');
-    if(currentStudent) {
-        document.getElementById('studentHeading').innerText = `Record for ${currentStudent}`;
-    }
-
-    function openTimeModal() {
-        document.getElementById('timeModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('timeModal').style.display = 'none';
-    }
-
-    function setAutoTime() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('med-time').value = `${hours}:${minutes}`;
-        document.getElementById('med-time').readOnly = true;
-        closeModal();
-    }
-
-    function setManualTime() {
-        const timeInput = document.getElementById('med-time');
-        timeInput.readOnly = false;
-        timeInput.value = "";
-        timeInput.placeholder = "Enter HH:MM";
-        timeInput.focus();
-        closeModal();
-    }
-
-    function saveRecord() {
-        const date = document.getElementById('med-date').value;
-        const time = document.getElementById('med-time').value;
-        const name = document.getElementById('med-name').value;
-        const amount = document.getElementById('med-amount').value;
-
-        if(!date || !time || !name || !amount) {
-            alert("Please fill in all fields.");
-            return;
+    <script>
+    // The Security Guard
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            alert("Unauthorized Access! Please log in first.");
+            window.location.href = 'index.html';
         }
 
-        // Create the record object
-        const newRecord = {
-            id: Date.now(), 
-            date: date,
-            time: time,
-            name: name,
-            amount: amount
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRTIjVzxF25XURIqR6kx8TYJXFTXmqeMU",
+            authDomain: "health-care-c5fe3.firebaseapp.com",
+            projectId: "health-care-c5fe3",
+            storageBucket: "health-care-c5fe3.firebasestorage.app",
+            messagingSenderId: "104419019360",
+            appId: "1:104419019360:web:fbd745b50a3d65d7d65105",
+            measurementId: "G-MBETSFCGR3"
         };
 
-        // Save to a unique key for THIS student
-        const storageKey = `medRecords_${currentStudent}`;
-        const existingRecords = JSON.parse(localStorage.getItem(storageKey)) || [];
-        
-        existingRecords.push(newRecord);
-        localStorage.setItem(storageKey, JSON.stringify(existingRecords));
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        alert("Record saved successfully!");
-        window.location.href = 'records.html';
-    }
-</script>
+        window.onload = function() {
+            const targetName = localStorage.getItem('currentStudentName');
+            if (targetName) {
+                document.getElementById('display-name').innerText = targetName;
+            } else {
+                window.location.href = 'dashboard.html';
+            }
 
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('med-date').value = today;
+        };
+
+        // FIXED MODAL FUNCTIONS
+        function openTimeModal() {
+            document.getElementById('time-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('time-modal').style.display = 'none';
+        }
+
+        function setCurrentTime() {
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const timeInput = document.getElementById('med-time');
+            timeInput.value = `${h}:${m}`;
+            timeInput.readOnly = true; // Lock it back
+            closeModal();
+        }
+
+        function setManualTime() {
+            const timeInput = document.getElementById('med-time');
+            timeInput.readOnly = false; // UNLOCK it for typing
+            timeInput.value = "";
+            timeInput.placeholder = "Example: 14:30";
+            closeModal();
+            timeInput.focus();
+        }
+
+        async function saveRecord() {
+            const date = document.getElementById('med-date').value;
+            const time = document.getElementById('med-time').value;
+            const name = document.getElementById('med-name').value;
+            const amount = document.getElementById('med-amount').value;
+            const studentName = localStorage.getItem('currentStudentName');
+
+            if(!date || !time || !name || !amount) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            const saveBtn = document.querySelector('.btn-save');
+            saveBtn.innerText = "Saving...";
+            saveBtn.disabled = true;
+
+            try {
+                await db.collection("medication_logs").add({
+                    studentName: studentName,
+                    date: date,
+                    time: time,
+                    medicineName: name,
+                    dosage: amount,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert("Record saved to Cloud!");
+                window.location.href = 'records.html';
+            } catch (error) {
+                console.error(error);
+                alert("Error saving record.");
+                saveBtn.innerText = "Save Record";
+                saveBtn.disabled = false;
+            }
+        }
+    </script>
 </body>
 </html>
