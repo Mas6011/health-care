@@ -50,12 +50,37 @@
         <div class="input-group"><label>Photo</label><input type="file" id="p2-pic" accept="image/*"></div>
         
         <div class="button-container">
-            <button class="btn-cancel" onclick="window.location.href='index.html'">Cancel</button>
-            <button class="btn-save" onclick="addNewStudent()">Save Student</button>
+            <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
+            <button class="btn-save" onclick="saveProfile()">Save Student</button>
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+
     <script>
+    // The Security Guard
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            alert("Unauthorized Access! Please log in first.");
+            window.location.href = 'index.html';
+        }
+
+        // 2. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRTIjVzxF25XURIqR6kx8TYJXFTXmqeMU",
+            authDomain: "health-care-c5fe3.firebaseapp.com",
+            projectId: "health-care-c5fe3",
+            storageBucket: "health-care-c5fe3.firebasestorage.app",
+            messagingSenderId: "104419019360",
+            appId: "1:104419019360:web:fbd745b50a3d65d7d65105",
+            measurementId: "G-MBETSFCGR3"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Helper to convert images to strings
         const toBase64 = file => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -63,47 +88,74 @@
             reader.onerror = error => reject(error);
         });
 
-        async function addNewStudent() {
-            let studentList = JSON.parse(localStorage.getItem('allStudents')) || [];
+        async function saveProfile() {
+            const name = document.getElementById('add-name').value;
+            const className = document.getElementById('add-class').value;
             
-            const newStudent = {
-                name: document.getElementById('add-name').value,
-                class: document.getElementById('add-class').value,
-                icNumber: document.getElementById('add-ic').value,
-                history: document.getElementById('add-history').value,
-                allergy: document.getElementById('add-allergy').value,
-                studentPic: "",
-                parents: [
-                    {
-                        name: document.getElementById('p1-name').value,
-                        phone: document.getElementById('p1-phone').value,
-                        ic: document.getElementById('p1-ic').value,
-                        rel: document.getElementById('p1-rel').value,
-                        pic: ""
-                    },
-                    {
-                        name: document.getElementById('p2-name').value,
-                        phone: document.getElementById('p2-phone').value,
-                        ic: document.getElementById('p2-ic').value,
-                        rel: document.getElementById('p2-rel').value,
-                        pic: ""
-                    }
-                ]
-            };
+            if (!name || !className) {
+                alert("Please enter at least the student's name and class.");
+                return;
+            }
 
-            const sFile = document.getElementById('add-pic-student').files[0];
-            if (sFile) newStudent.studentPic = await toBase64(sFile);
-            
-            const p1File = document.getElementById('p1-pic').files[0];
-            if (p1File) newStudent.parents[0].pic = await toBase64(p1File);
+            // Show a "Saving" state
+            const saveBtn = document.querySelector('button');
+            saveBtn.innerText = "Saving to Cloud...";
+            saveBtn.disabled = true;
 
-            const p2File = document.getElementById('p2-pic').files[0];
-            if (p2File) newStudent.parents[1].pic = await toBase64(p2File);
+            try {
+                // Build the student object
+                const newStudent = {
+                    name: name,
+                    class: className,
+                    icNumber: document.getElementById('add-ic').value,
+                    history: document.getElementById('add-history').value,
+                    allergy: document.getElementById('add-allergy').value,
+                    studentPic: "",
+                    parents: [
+                        {
+                            name: document.getElementById('p1-name').value,
+                            phone: document.getElementById('p1-phone').value,
+                            ic: document.getElementById('p1-ic').value,
+                            rel: document.getElementById('p1-rel').value,
+                            pic: ""
+                        },
+                        {
+                            name: document.getElementById('p2-name').value,
+                            phone: document.getElementById('p2-phone').value,
+                            ic: document.getElementById('p2-ic').value,
+                            rel: document.getElementById('p2-rel').value,
+                            pic: ""
+                        }
+                    ],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
 
-            studentList.push(newStudent);
-            localStorage.setItem('allStudents', JSON.stringify(studentList));
-            localStorage.setItem('currentStudentName', newStudent.name);
-            window.location.href = 'student-profile.html';
+                // Process Images
+                const sFile = document.getElementById('add-pic-student').files[0];
+                if (sFile) newStudent.studentPic = await toBase64(sFile);
+                
+                const p1File = document.getElementById('p1-pic').files[0];
+                if (p1File) newStudent.parents[0].pic = await toBase64(p1File);
+
+                const p2File = document.getElementById('p2-pic').files[0];
+                if (p2File) newStudent.parents[1].pic = await toBase64(p2File);
+
+                // --- FIREBASE SAVE ---
+                // We use the name as the Document ID so it's easy to find
+                await db.collection("students").doc(name).set(newStudent);
+
+                // We still keep this so the next page knows who we just added
+                localStorage.setItem('currentStudentName', name);
+
+                alert("Student Profile added to Cloud successfully!");
+                window.location.href = 'student-profile.html';
+
+            } catch (error) {
+                console.error("Error saving to Firebase:", error);
+                alert("Error saving profile. Check console for details.");
+                saveBtn.innerText = "Save Student Profile";
+                saveBtn.disabled = false;
+            }
         }
     </script>
 </body>
