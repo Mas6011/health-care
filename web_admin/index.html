@@ -3,209 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SMK CERIA HEALTH CARE</title>
+    <title>SMK CERIA - Staff Login</title>
     <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f2f5;
-        }
-
-        .dashboard-container {
-            background-color: white;
-            padding: 30px;
-            width: 500px;
-            border-radius: 20px;
-            border: 2px solid #cbd5e1;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            position: relative;
-        }
-
-        h2 {
-            margin-top: 0;
-            font-size: 20px;
-            color: #1e293b;
-            border-bottom: 2px solid #3b82f6;
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-        }
-
-        .search-section {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: #475569;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 10px;
-        }
-
-        input {
-            flex-grow: 1;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .btn-search {
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 0 15px;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        #results-area {
-            margin-top: 20px;
-            min-height: 60px;
-        }
-
-        .result-card {
-            display: flex;
-            justify-content: space-between;
-            background-color: #ECEFF1;
-            border: 1.5px solid #CFD8DC;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: bold;
-            color: #263238;
-        }
-
-        .action-bar {
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .icon-btn {
-            min-width: 80px;
-            height: 55px;
-            border: 2px solid #cbd5e1;
-            background-color: white;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.2s;
-            text-decoration: none;
-            color: black;
-            padding: 0 10px;
-        }
-
-        .icon-btn:hover {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-            transform: translateY(-3px);
-        }
-
-        .icon-btn::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 65px;
-            background-color: #1e293b;
-            color: white;
-            font-size: 12px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s;
-        }
-
-        .icon-btn:hover::after {
-            opacity: 1;
-        }
-
-        /* Removed btn-emergency styles */
-        .btn-camera:hover { background-color: #f0fdf4; border-color: #22c55e; }
-
-        /* Red Reset Button Style */
-        .btn-reset {
-            color: #ef4444 !important;
-            border-color: #fca5a5 !important;
-        }
-
-        .btn-reset:hover {
-            background-color: #fef2f2 !important;
-            border-color: #ef4444 !important;
-            transform: translateY(-2px);
-        }
+        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f0f2f5; }
+        .login-container { background: white; padding: 40px; width: 350px; border-radius: 20px; border: 2px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        h2 { font-size: 20px; color: #1e293b; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; margin-bottom: 25px; text-align: center; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 8px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #cbd5e1; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 14px; background: #059669; color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div class="dashboard-container">
-        <h2>SMK CERIA HEALTH CARE</h2>
-
-        <div class="search-section">
-            <label>Search for student:</label>
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Type name here...">
-                <button class="btn-search" onclick="showResult()">🔍</button>
-            </div>
+    <div class="login-container">
+        <h2>STAFF PORTAL</h2>
+        <div class="input-group">
+            <label>Staff Email</label>
+            <input type="email" id="email" placeholder="teacher@school.edu.my">
         </div>
-
-        <div id="results-area"></div>
-
-        <div class="action-bar">
-            <a href="add-profile.html" class="icon-btn" data-tooltip="Add Student Profile">➕</a>
-            
-            <a href="reset.html" class="icon-btn btn-reset" data-tooltip="Erase all data (Temporary)">🗑️</a>
-            
-            <div style="display: flex; gap: 8px;">
-                <a href="camera.html" class="icon-btn btn-camera" data-tooltip="Camera Test">👨‍⚕️📷</a>
-            </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="••••••••">
         </div>
+        <button class="btn-login" onclick="handleLogin()">Log In</button>
+        <p id="error-msg" style="color:red; font-size:12px; margin-top:10px; text-align:center; display:none;"></p>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+
     <script>
-        function showResult() {
-            const query = document.getElementById('searchInput').value.trim().toLowerCase();
-            const resultsArea = document.getElementById('results-area');
-            
-            const studentList = JSON.parse(localStorage.getItem('allStudents')) || [];
-            const foundStudent = studentList.find(s => s.name.toLowerCase() === query);
-            
-            if(foundStudent) {
-                localStorage.setItem('currentStudentName', foundStudent.name);
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRTIjVzxF25XURIqR6kx8TYJXFTXmqeMU",
+            authDomain: "health-care-c5fe3.firebaseapp.com",
+            projectId: "health-care-c5fe3",
+            storageBucket: "health-care-c5fe3.firebasestorage.app",
+            messagingSenderId: "104419019360",
+            appId: "1:104419019360:web:fbd745b50a3d65d7d65105"
+        };
+        firebase.initializeApp(firebaseConfig);
 
-                resultsArea.innerHTML = `
-                    <a href="student-profile.html" style="text-decoration: none; display: block;">
-                        <div class="result-card" style="cursor: pointer;">
-                            <span>Name: ${foundStudent.name}</span>
-                            <span>Class: ${foundStudent.class}</span>
-                        </div>
-                    </a>
-                `;
-            } else if (query !== "") {
-                resultsArea.innerHTML = `
-                    <div class="result-card" style="background-color: #f1f5f9; border-color: #cbd5e1; color: #64748b;">
-                        <span>No student found with that name.</span>
-                    </div>
-                `;
-            }
+        function handleLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('error-msg');
+
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // 1. Mark as logged in
+                    localStorage.setItem('isLoggedIn', 'true');
+                    // 2. Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                })
+                .catch((error) => {
+                    errorEl.innerText = "Invalid Staff Credentials";
+                    errorEl.style.display = "block";
+                });
         }
-
-        // Removed triggerCall() function
     </script>
 </body>
 </html>
