@@ -16,10 +16,17 @@
             background-color: #f0f2f5;
         }
 
+        /* --- UI ADJUSTING SECTION --- */
         .dashboard-container {
             background-color: white;
             padding: 30px;
-            width: 500px;
+            
+            /* THE FIX: Responsive centering and width */
+            width: 90%;            /* Leaves margin on mobile */
+            max-width: 550px;      /* Slightly wider/longer for Desktop */
+            box-sizing: border-box; /* Prevents padding from breaking width */
+            margin: 20px auto;     /* Ensures no shifting on small screens */
+
             border-radius: 20px;
             border: 2px solid #cbd5e1;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
@@ -31,7 +38,7 @@
         h2 {
             margin-top: 0;
             font-size: 20px;
-            color: #3b82f6; /* Keeping your blue theme */
+            color: #3b82f6; 
             border-bottom: 2px solid #3b82f6;
             padding-bottom: 10px;
             margin-bottom: 25px;
@@ -61,7 +68,6 @@
             outline: none;
         }
 
-        /* Your specific magnifying glass button style */
         .btn-search {
             padding: 12px 20px;
             background-color: #3b82f6;
@@ -85,7 +91,6 @@
             color: #1e293b;
         }
 
-        /* New Bottom Navigation Styling */
         .bottom-nav {
             display: flex;
             justify-content: space-between;
@@ -119,7 +124,6 @@
             transform: translateY(-2px);
         }
 
-        /* Tooltip Logic */
         .icon-btn:hover::after {
             content: attr(data-tooltip);
             position: absolute;
@@ -134,7 +138,6 @@
 
         .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
 
-        /* Logout Modal Styling */
         #logout-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none;
@@ -167,8 +170,7 @@
             </div>
         </div>
 
-        <div class="results-area" id="results-area">
-            </div>
+        <div class="results-area" id="results-area"></div>
 
         <div class="bottom-nav">
             <div class="left-group">
@@ -196,7 +198,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
 
     <script>
-        // The Security Guard
         if (localStorage.getItem('isLoggedIn') !== 'true') {
             alert("Unauthorized Access! Please log in first.");
             window.location.href = 'index.html';
