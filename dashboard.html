@@ -21,11 +21,11 @@
             background-color: white;
             padding: 30px;
             
-            /* THE FIX: Responsive centering and width */
-            width: 90%;            /* Leaves margin on mobile */
-            max-width: 550px;      /* Slightly wider/longer for Desktop */
-            box-sizing: border-box; /* Prevents padding from breaking width */
-            margin: 20px auto;     /* Ensures no shifting on small screens */
+            /* Responsive centering and width */
+            width: 90%;            /* Margin for mobile */
+            max-width: 550px;      /* Longer for Desktop */
+            box-sizing: border-box;
+            margin: 20px auto;     /* Prevents shifting */
 
             border-radius: 20px;
             border: 2px solid #cbd5e1;
@@ -38,7 +38,7 @@
         h2 {
             margin-top: 0;
             font-size: 20px;
-            color: #3b82f6; 
+            color: #3b82f6;
             border-bottom: 2px solid #3b82f6;
             padding-bottom: 10px;
             margin-bottom: 25px;
@@ -54,29 +54,35 @@
             margin-bottom: 8px;
         }
 
+        /* NEW: Merged Search Box Style */
         .search-box {
             display: flex;
-            gap: 10px;
+            border: 1.5px solid #cbd5e1; /* Single border for both */
+            border-radius: 12px;
+            overflow: hidden; /* Clips the blue button to the radius */
+            background: white;
         }
 
         input {
             flex: 1;
             padding: 12px;
-            border-radius: 12px;
-            border: 1.5px solid #cbd5e1;
-            font-size: 16px;
+            border: none; /* Border removed to merge */
             outline: none;
+            font-size: 16px;
+            min-width: 0; /* Prevents push-out on tiny screens */
         }
 
         .btn-search {
-            padding: 12px 20px;
+            padding: 0 20px; /* Centered padding for emoji */
             background-color: #3b82f6;
             color: white;
             border: none;
-            border-radius: 12px;
             font-size: 18px;
             cursor: pointer;
             transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .results-area { min-height: 80px; margin-bottom: 30px; }
