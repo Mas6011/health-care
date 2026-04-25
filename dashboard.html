@@ -90,11 +90,13 @@
         .result-card {
             padding: 15px;
             border-radius: 15px;
-            border: 1.5px solid #3b82f6;
+            border: 1.5px solid #cbd5e1;
             display: flex;
             justify-content: space-between;
             font-weight: bold;
             color: #1e293b;
+            background-color: #f1f5f9;
+            margin-bottom: 10px;
         }
 
         .bottom-nav {
@@ -171,7 +173,7 @@
         <div class="search-section">
             <label>Find Student by Name</label>
             <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Enter student name...">
+                <input type="text" id="searchInput" placeholder="Enter student name..." oninput="liveSearch()">
                 <button class="btn-search" onclick="showResult()">🔍</button>
             </div>
         </div>
@@ -220,32 +222,58 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        async function showResult() {
-            const query = document.getElementById('searchInput').value.trim();
-            const resultsArea = document.getElementById('results-area');
-            if (!query) return;
+        let allStudents = [];
 
-            resultsArea.innerHTML = "Searching...";
+        window.onload = async function() {
+            await loadAllStudents();
+        };
 
+        async function loadAllStudents() {
             try {
-                const doc = await db.collection("students").doc(query).get();
-                if (doc.exists) {
-                    const student = doc.data();
-                    localStorage.setItem('currentStudentName', student.name);
-                    resultsArea.innerHTML = `
-                        <a href="student-profile.html" style="text-decoration: none; display: block;">
-                            <div class="result-card" style="cursor: pointer; background-color: #dcfce7; border-color: #22c55e;">
-                                <span>Name: ${student.name}</span>
-                                <span>Class: ${student.class}</span>
-                            </div>
-                        </a>
-                    `;
-                } else {
-                    resultsArea.innerHTML = `<div class="result-card" style="background:#f1f5f9; border-color:#cbd5e1; color:#64748b;"><span>No student found.</span></div>`;
-                }
+                const snapshot = await db.collection("students").get();
+                allStudents = [];
+                snapshot.forEach(doc => {
+                    allStudents.push({ id: doc.id, ...doc.data() });
+                });
             } catch (e) {
-                resultsArea.innerHTML = "Error searching connection.";
+                console.error("Error loading students:", e);
             }
+        }
+
+        async function liveSearch() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const resultsArea = document.getElementById('results-area');
+            
+            if (!query) {
+                resultsArea.innerHTML = "";
+                return;
+            }
+
+            if (allStudents.length === 0) {
+                await loadAllStudents();
+            }
+
+            const filtered = allStudents.filter(student => 
+                student.name.toLowerCase().startsWith(query)
+            );
+
+            if (filtered.length === 0) {
+                resultsArea.innerHTML = `<div class="result-card"><span>No students found.</span></div>`;
+                return;
+            }
+
+            resultsArea.innerHTML = filtered.map(student => `
+                <a href="student-profile.html" style="text-decoration: none; display: block;" onclick="localStorage.setItem('currentStudentName', '${student.name}')">
+                    <div class="result-card">
+                        <span>Name: ${student.name}</span>
+                        <span>Class: ${student.class}</span>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        async function showResult() {
+            await liveSearch();
         }
 
         function showLogoutModal() { document.getElementById('logout-modal').style.display = 'flex'; }
