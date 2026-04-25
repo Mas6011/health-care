@@ -54,11 +54,38 @@
         
         <div class="button-container">
             <button class="btn-cancel" onclick="window.location.href='student-profile.html'">Cancel</button>
-            <button class="btn-save" onclick="updateProfile()">Save Changes</button>
+            <button class="btn-save" onclick="saveChanges()">Save Changes</button>
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+
     <script>
+        // The Security Guard
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            alert("Unauthorized Access! Please log in first.");
+            window.location.href = 'index.html';
+        }
+
+        // 2. Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRTIjVzxF25XURIqR6kx8TYJXFTXmqeMU",
+            authDomain: "health-care-c5fe3.firebaseapp.com",
+            projectId: "health-care-c5fe3",
+            storageBucket: "health-care-c5fe3.firebasestorage.app",
+            messagingSenderId: "104419019360",
+            appId: "1:104419019360:web:fbd745b50a3d65d7d65105",
+            measurementId: "G-MBETSFCGR3"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const targetName = localStorage.getItem('currentStudentName');
+        let originalData = null; // To keep track of old images if new ones aren't uploaded
+
+        // Helper for images
         const toBase64 = file => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -66,89 +93,100 @@
             reader.onerror = error => reject(error);
         });
 
-        async function updateProfile() {
-            let studentList = JSON.parse(localStorage.getItem('allStudents')) || [];
-            const originalName = localStorage.getItem('currentStudentName');
-
-            // Find existing data to preserve images if new ones aren't uploaded
-            const existingStudent = studentList.find(s => s.name === originalName);
-
-            const studentData = {
-                name: document.getElementById('edit-name').value,
-                class: document.getElementById('edit-class').value,
-                icNumber: document.getElementById('edit-ic').value,
-                history: document.getElementById('edit-history').value,
-                allergy: document.getElementById('edit-allergy').value,
-                studentPic: existingStudent ? existingStudent.studentPic : "",
-                parents: [
-                    {
-                        name: document.getElementById('p1-name').value,
-                        phone: document.getElementById('p1-phone').value,
-                        ic: document.getElementById('p1-ic').value,
-                        rel: document.getElementById('p1-rel').value,
-                        pic: (existingStudent && existingStudent.parents[0]) ? existingStudent.parents[0].pic : ""
-                    },
-                    {
-                        name: document.getElementById('p2-name').value,
-                        phone: document.getElementById('p2-phone').value,
-                        ic: document.getElementById('p2-ic').value,
-                        rel: document.getElementById('p2-rel').value,
-                        pic: (existingStudent && existingStudent.parents[1]) ? existingStudent.parents[1].pic : ""
-                    }
-                ]
-            };
-
-            // Process New Student Photo
-            const sFile = document.getElementById('edit-pic-student').files[0];
-            if (sFile) studentData.studentPic = await toBase64(sFile);
-
-            // Process Parent Photos
-            const p1File = document.getElementById('p1-pic').files[0];
-            if (p1File) studentData.parents[0].pic = await toBase64(p1File);
-
-            const p2File = document.getElementById('p2-pic').files[0];
-            if (p2File) studentData.parents[1].pic = await toBase64(p2File);
-
-            // Update the list
-            const index = studentList.findIndex(s => s.name === originalName);
-            if (index !== -1) {
-                studentList[index] = studentData;
-            } else {
-                studentList.push(studentData);
+        window.onload = async function() {
+            if (!targetName) {
+                window.location.href = 'dashboard.html';
+                return;
             }
 
-            localStorage.setItem('allStudents', JSON.stringify(studentList));
-            localStorage.setItem('currentStudentName', studentData.name);
-
-            alert("Data Updated Successfully!");
-            window.location.href = 'student-profile.html';
-        }
-
-        window.onload = function() {
-            const target = localStorage.getItem('currentStudentName');
-            const student = (JSON.parse(localStorage.getItem('allStudents')) || []).find(s => s.name === target);
-
-            if(student) {
-                document.getElementById('edit-name').value = student.name;
-                document.getElementById('edit-class').value = student.class;
-                document.getElementById('edit-ic').value = student.icNumber || "";
-                document.getElementById('edit-history').value = student.history;
-                document.getElementById('edit-allergy').value = student.allergy;
-                
-                if(student.parents[0]) {
-                    document.getElementById('p1-name').value = student.parents[0].name;
-                    document.getElementById('p1-phone').value = student.parents[0].phone;
-                    document.getElementById('p1-ic').value = student.parents[0].ic || "";
-                    document.getElementById('p1-rel').value = student.parents[0].rel || "";
+            try {
+                // Fetch current data from Cloud
+                const doc = await db.collection("students").doc(targetName).get();
+                if (doc.exists) {
+                    originalData = doc.data();
+                    
+                    // Fill Inputs
+                    document.getElementById('edit-name').value = originalData.name;
+                    document.getElementById('edit-class').value = originalData.class;
+                    document.getElementById('edit-ic').value = originalData.icNumber || "";
+                    document.getElementById('edit-history').value = originalData.history;
+                    document.getElementById('edit-allergy').value = originalData.allergy;
+                    
+                    if (originalData.parents) {
+                        originalData.parents.forEach((parent, index) => {
+                            const num = index + 1;
+                            document.getElementById(`p${num}-name`).value = parent.name || "";
+                            document.getElementById(`p${num}-phone`).value = parent.phone || "";
+                            document.getElementById(`p${num}-ic`).value = parent.ic || "";
+                            document.getElementById(`p${num}-rel`).value = parent.rel || "";
+                        });
+                    }
                 }
-                if(student.parents[1]) {
-                    document.getElementById('p2-name').value = student.parents[1].name;
-                    document.getElementById('p2-phone').value = student.parents[1].phone;
-                    document.getElementById('p2-ic').value = student.parents[1].ic || "";
-                    document.getElementById('p2-rel').value = student.parents[1].rel || "";
-                }
+            } catch (error) {
+                console.error("Error loading profile:", error);
             }
         };
+
+        async function saveChanges() {
+            const saveBtn = document.querySelector('.btn-save');
+            saveBtn.innerText = "Updating Cloud...";
+            saveBtn.disabled = true;
+
+            try {
+                // Build updated object
+                const updatedStudent = {
+                    name: document.getElementById('edit-name').value,
+                    class: document.getElementById('edit-class').value,
+                    icNumber: document.getElementById('edit-ic').value,
+                    history: document.getElementById('edit-history').value,
+                    allergy: document.getElementById('edit-allergy').value,
+                    studentPic: originalData.studentPic, // Default to old pic
+                    parents: [
+                        {
+                            name: document.getElementById('p1-name').value,
+                            phone: document.getElementById('p1-phone').value,
+                            ic: document.getElementById('p1-ic').value,
+                            rel: document.getElementById('p1-rel').value,
+                            pic: originalData.parents[0]?.pic || ""
+                        },
+                        {
+                            name: document.getElementById('p2-name').value,
+                            phone: document.getElementById('p2-phone').value,
+                            ic: document.getElementById('p2-ic').value,
+                            rel: document.getElementById('p2-rel').value,
+                            pic: originalData.parents[1]?.pic || ""
+                        }
+                    ],
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                // Check for new images
+                const sFile = document.getElementById('edit-pic-student').files[0];
+                if (sFile) updatedStudent.studentPic = await toBase64(sFile);
+                
+                const p1File = document.getElementById('p1-pic').files[0];
+                if (p1File) updatedStudent.parents[0].pic = await toBase64(p1File);
+
+                const p2File = document.getElementById('p2-pic').files[0];
+                if (p2File) updatedStudent.parents[1].pic = await toBase64(p2File);
+
+                // Update Firestore
+                await db.collection("students").doc(targetName).update(updatedStudent);
+
+                // If name was changed, we'd usually need to handle ID changes, 
+                // but for now, we'll keep the name as the primary ID.
+                localStorage.setItem('currentStudentName', updatedStudent.name);
+
+                alert("Profile updated successfully!");
+                window.location.href = 'student-profile.html';
+
+            } catch (error) {
+                console.error("Error updating profile:", error);
+                alert("Failed to update profile.");
+                saveBtn.innerText = "Save Changes";
+                saveBtn.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
