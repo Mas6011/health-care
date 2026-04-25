@@ -46,12 +46,60 @@
 
         input:focus { border-color: #3b82f6; background-color: #f8fafc; }
 
-        .btn-save { 
-            width: 100%; padding: 14px; background-color: #3b82f6; color: white; border: none; 
-            border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;
+        .form-actions { display: flex; gap: 10px; margin-top: 15px; justify-content: space-between; }
+
+        .btn-action {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: 2px solid #cbd5e1;
+            background: white;
+            color: #475569;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: border-color 0.2s, transform 0.2s, background-color 0.2s;
+            animation-duration: 0.4s;
+            animation-fill-mode: both;
+            position: relative;
         }
 
-        .btn-save:hover { background-color: #2563eb; transform: translateY(-2px); }
+        .btn-action:hover {
+            animation-name: jump;
+            background-color: #f8fafc;
+        }
+
+        .btn-action::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1e293b;
+            color: white;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+
+        .btn-action:hover::after {
+            opacity: 1;
+        }
+
+        .btn-add { color: #3b82f6; }
+        .btn-add:hover { border-color: #3b82f6; }
+        .btn-cancel { color: #ef4444; border-color: #ef4444; }
+        .btn-cancel:hover { border-color: #ef4444; }
+
+        @keyframes jump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
 
         /* FIXED MODAL STYLING */
         #time-modal {
@@ -99,8 +147,10 @@
             <input type="text" id="med-amount" placeholder="e.g. 2 Tablets">
         </div>
 
-        <button class="btn-save" onclick="saveRecord()">Save Record</button>
-        <button onclick="window.history.back()" style="width:100%; background:none; border:none; color:#64748b; margin-top:15px; cursor:pointer;">Cancel</button>
+        <div class="form-actions">
+            <button class="btn-action btn-cancel" data-tooltip="Cancel" onclick="window.history.back()">❌</button>
+            <button class="btn-action btn-add" data-tooltip="Add Record" onclick="saveRecord()">➕</button>
+        </div>
     </div>
 
     <div id="time-modal">
