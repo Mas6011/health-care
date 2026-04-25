@@ -20,13 +20,12 @@
         #parents-content { display: none; padding: 10px; background-color: #f8fafc; border-radius: 15px; margin-bottom: 25px; border: 1.5px dashed #cbd5e1; }
         .parent-card { display: flex; gap: 15px; align-items: center; padding: 10px; border-bottom: 1px solid #e2e8f0; }
         .parent-card:last-child { border-bottom: none; }
-        .action-bar { display: flex; justify-content: space-between; margin-top: 10px; gap: 10px; }
-        .icon-btn { min-width: 65px; height: 55px; border: 2px solid #cbd5e1; background-color: white; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 22px; cursor: pointer; text-decoration: none; transition: all 0.2s; position: relative; }
+        .action-bar { display: flex; justify-content: center; flex-wrap: wrap; margin-top: 10px; gap: 8px; }
+        .icon-btn { flex: 0 0 auto; width: 50px; height: 50px; border: 2px solid #cbd5e1; background-color: white; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; text-decoration: none; transition: all 0.2s; position: relative; }
         .icon-btn:hover { border-color: #3b82f6; background-color: #eff6ff; transform: translateY(-2px); }
-        .icon-btn::after { content: attr(data-tooltip); position: absolute; bottom: 65px; background-color: #1e293b; color: white; font-size: 10px; padding: 5px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; }
+        .icon-btn::after { content: attr(data-tooltip); position: absolute; bottom: 60px; background-color: #1e293b; color: white; font-size: 10px; padding: 5px 8px; border-radius: 6px; white-space: nowrap; opacity: 0; pointer-events: none; }
         .icon-btn:hover::after { opacity: 1; }
-        .btn-call { color: #ef4444; border-color: #fca5a5; }
-        .btn-emergency { color: #b91c1c; border-color: #ef4444; background-color: #fef2f2; }
+        .btn-call { color: #ef4444; border-color: #ef4444; }
     </style>
 </head>
 <body>
@@ -81,12 +80,9 @@
 
         <div class="action-bar">
             <a href="dashboard.html" class="icon-btn" data-tooltip="Back to Main Menu">⏪</a>
-            <div style="display: flex; gap: 8px;">
-                <div class="icon-btn btn-call" data-tooltip="Call Parents" onclick="callParent()">📞👪</div>
-                <div class="icon-btn btn-emergency" data-tooltip="Emergency Call" onclick="triggerEmergency()">📞🚨</div>
-                <a href="edit-profile.html" class="icon-btn" data-tooltip="Edit Profile">📝</a>
-                <a href="records.html" class="icon-btn" data-tooltip="Medication Report">💊</a>
-            </div>
+            <div class="icon-btn btn-call" data-tooltip="Call" onclick="openCallOptions()">📞</div>
+            <a href="edit-profile.html" class="icon-btn" data-tooltip="Edit Profile">📝</a>
+            <a href="records.html" class="icon-btn" data-tooltip="Medication Report">💊</a>
         </div>
     </div>
 
@@ -191,7 +187,7 @@
             }
         };
 
-        function openSelectionModal(title, isEmergency) {
+        function openCallOptions() {
             if(!currentStudentData || !currentStudentData.parents) return;
 
             const modal = document.getElementById('call-modal');
@@ -199,56 +195,54 @@
             const descEl = document.getElementById('modal-desc');
             const btnContainer = document.getElementById('modal-buttons');
             
-            titleEl.innerText = title;
+            titleEl.innerText = "Select Call Option";
+            descEl.style.display = "none";
             btnContainer.innerHTML = ""; 
 
-            if (isEmergency) {
-                descEl.style.display = "block";
-                descEl.innerText = "This will notify emergency services and alert both guardians immediately.";
-                
-                const hospitalBtn = document.createElement('button');
-                hospitalBtn.style.cssText = "padding:15px; border-radius:12px; border:none; background:#ef4444; color:white; font-weight:bold; cursor:pointer; font-size:16px;";
-                hospitalBtn.innerText = "🏥 Call Hospital (999)";
-                hospitalBtn.onclick = () => {
-                    let msg = "🚨 Calling Hospital...\n\n✅ SMS Alert sent to: " + (currentStudentData.parents[0].name || "Guardian");
-                    if(currentStudentData.parents[1] && currentStudentData.parents[1].name) msg += " & " + currentStudentData.parents[1].name;
-                    alert(msg);
+            // Add Parent 1 option
+            if(currentStudentData.parents[0] && currentStudentData.parents[0].name) {
+                const btn1 = document.createElement('button');
+                btn1.style.cssText = "padding:12px; border-radius:10px; border:1.5px solid #3b82f6; background:white; color:#3b82f6; font-weight:bold; cursor:pointer; width:100%; font-size:14px;";
+                const rel1 = currentStudentData.parents[0].rel ? ` (${currentStudentData.parents[0].rel})` : "";
+                btn1.innerText = `📞 Call ${currentStudentData.parents[0].name}${rel1}`;
+                btn1.onclick = () => {
+                    alert(`Calling ${currentStudentData.parents[0].name}...`);
                     closeModal();
                 };
-                btnContainer.appendChild(hospitalBtn);
-            } else {
-                descEl.style.display = "none";
-                currentStudentData.parents.forEach((parent) => {
-                    if(parent.name) {
-                        const btn = document.createElement('button');
-                        const color = "#3b82f6";
-                        btn.style.cssText = `padding:12px; border-radius:10px; border:1.5px solid ${color}; background:white; color:${color}; font-weight:bold; cursor:pointer;`;
-                        
-                        const relation = parent.rel ? ` (${parent.rel})` : "";
-                        btn.innerText = `📞 Call ${parent.name}${relation}`;
-                        
-                        btn.onclick = () => {
-                            alert(`Calling ${parent.name}...`);
-                            closeModal();
-                        };
-                        btnContainer.appendChild(btn);
-                    }
-                });
+                btnContainer.appendChild(btn1);
             }
+
+            // Add Parent 2 option
+            if(currentStudentData.parents[1] && currentStudentData.parents[1].name) {
+                const btn2 = document.createElement('button');
+                btn2.style.cssText = "padding:12px; border-radius:10px; border:1.5px solid #3b82f6; background:white; color:#3b82f6; font-weight:bold; cursor:pointer; width:100%; font-size:14px;";
+                const rel2 = currentStudentData.parents[1].rel ? ` (${currentStudentData.parents[1].rel})` : "";
+                btn2.innerText = `📞 Call ${currentStudentData.parents[1].name}${rel2}`;
+                btn2.onclick = () => {
+                    alert(`Calling ${currentStudentData.parents[1].name}...`);
+                    closeModal();
+                };
+                btnContainer.appendChild(btn2);
+            }
+
+            // Add Emergency option
+            const emergencyBtn = document.createElement('button');
+            emergencyBtn.style.cssText = "padding:12px; border-radius:10px; border:none; background:#ef4444; color:white; font-weight:bold; cursor:pointer; width:100%; font-size:14px;";
+            emergencyBtn.innerText = "🚨 Emergency Call (999)";
+            emergencyBtn.onclick = () => {
+                let msg = "🚨 Calling Hospital...\n\n✅ SMS Alert sent to: " + (currentStudentData.parents[0].name || "Guardian");
+                if(currentStudentData.parents[1] && currentStudentData.parents[1].name) msg += " & " + currentStudentData.parents[1].name;
+                alert(msg);
+                closeModal();
+            };
+            btnContainer.appendChild(emergencyBtn);
+
             modal.style.display = 'flex';
         }
 
         function toggleParents() {
             const content = document.getElementById('parents-content');
             content.style.display = (content.style.display === "block") ? "none" : "block";
-        }
-
-        function callParent() {
-            openSelectionModal("Select Parent to Call", false);
-        }
-
-        function triggerEmergency() {
-            openSelectionModal("🚨 EMERGENCY PROTOCOL", true);
         }
 
         function closeModal() {
