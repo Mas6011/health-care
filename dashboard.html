@@ -16,17 +16,10 @@
             background-color: #f0f2f5;
         }
 
-        /* --- UI ADJUSTING SECTION --- */
         .dashboard-container {
             background-color: white;
             padding: 30px;
-            
-            /* THE FIX: Responsive centering */
-            width: 90%;
-            max-width: 500px;
-            box-sizing: border-box;
-            margin: 20px auto;
-
+            width: 500px;
             border-radius: 20px;
             border: 2px solid #cbd5e1;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
@@ -44,8 +37,17 @@
             margin-bottom: 25px;
         }
 
-        .search-section {
-            margin-bottom: 20px;
+        .search-section { margin-bottom: 20px; }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .search-box {
             display: flex;
             gap: 10px;
         }
@@ -59,76 +61,96 @@
             outline: none;
         }
 
-        .search-btn {
+        /* Your specific magnifying glass button style */
+        .btn-search {
+            padding: 12px 20px;
             background-color: #3b82f6;
+            color: white;
             border: none;
-            padding: 10px 15px;
             border-radius: 12px;
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-        /* Results Area */
-        .result-card {
-            padding: 15px;
-            border: 1.5px solid #cbd5e1;
-            border-radius: 15px;
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            font-weight: bold;
-            color: #1e293b;
-        }
-
-        /* Navigation Icons Grid */
-        .nav-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .nav-item {
-            background: #f8fafc;
-            border: 1.5px solid #cbd5e1;
-            padding: 15px;
-            border-radius: 15px;
-            text-align: center;
+            font-size: 18px;
             cursor: pointer;
             transition: 0.2s;
         }
 
-        .nav-item:hover { background: #eff6ff; border-color: #3b82f6; }
-        .nav-icon { font-size: 24px; display: block; margin-bottom: 5px; }
-        .nav-text { font-size: 12px; color: #64748b; font-weight: bold; }
+        .results-area { min-height: 80px; margin-bottom: 30px; }
 
-        .logout-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
+        .result-card {
+            padding: 15px;
+            border-radius: 15px;
+            border: 1.5px solid #3b82f6;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #1e293b;
+        }
+
+        /* New Bottom Navigation Styling */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 15px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .left-group { display: flex; gap: 10px; }
+
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            border: 1.5px solid #cbd5e1;
+            background: white;
             font-size: 20px;
             cursor: pointer;
-            color: #94a3b8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.2s;
+            text-decoration: none;
+            position: relative;
         }
 
-        /* Modal Styles */
-        .modal-overlay {
+        .icon-btn:hover {
+            background-color: #f8fafc;
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        /* Tooltip Logic */
+        .icon-btn:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 60px;
+            background: #1e293b;
+            color: white;
+            font-size: 11px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-logout:hover { border-color: #ef4444; color: #ef4444; }
+
+        /* Logout Modal Styling */
+        #logout-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); display: none; justify-content: center;
-            align-items: center; z-index: 1000;
+            background: rgba(0,0,0,0.5); display: none;
+            justify-content: center; align-items: center; z-index: 1000;
         }
-        .modal-box {
-            background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 300px;
-            text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+        .modal-content {
+            background: white; padding: 25px; border-radius: 20px;
+            text-align: center; width: 300px;
         }
-        .modal-box h3 { margin-top: 0; color: #1e293b; }
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .modal-btn { flex: 1; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-no { background: #f1f5f9; color: #475569; }
-        .btn-yes { background: #ef4444; color: white; }
+
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .modal-btns button { flex: 1; padding: 10px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .confirm-logout { background: #ef4444; color: white; }
+        .cancel-logout { background: #f1f5f9; color: #64748b; }
+
     </style>
 </head>
 <body>
