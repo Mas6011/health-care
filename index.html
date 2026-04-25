@@ -127,7 +127,7 @@
                     alert("Login Successful! Redirecting to Dashboard...");
                     
                     localStorage.setItem('isLoggedIn', 'true');
-                    window.location.href = 'dashboard.html';
+                    window.location.href = 'web_admin/dashboard.html';
                 })
                 .catch((error) => {
                     errorEl.innerText = "Invalid email or password. Please try again.";
