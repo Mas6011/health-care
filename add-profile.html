@@ -6,20 +6,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Student - SMK CERIA HEALTH CARE</title>
     <style>
-        body { font-family: Arial, Helvetica, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-color: #f0f2f5; padding: 20px 0; }
-        .edit-container { background-color: white; padding: 40px; width: 450px; border-radius: 20px; border: 2px solid #cbd5e1; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
+        /* --- General Page Layout --- */
+        body { 
+            font-family: Arial, Helvetica, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            background-color: #f0f2f5; 
+            padding: 20px 0; 
+        }
+
+        /* --- UI Adjusting Section (Responsive Centering) --- */
+        .edit-container { 
+            background-color: white; 
+            padding: 40px; 
+            width: 90%;            /* Responsive: Takes 90% of screen on mobile */
+            max-width: 450px;      /* Desktop/Tablet: Locks at 450px */
+            box-sizing: border-box; 
+            margin: 20px auto; 
+            border-radius: 20px; 
+            border: 2px solid #cbd5e1; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); 
+        }
+
+        /* --- Typography & Headers --- */
         .header-title { font-size: 18px; font-weight: bold; color: #1e293b; margin-bottom: 5px; }
         h2 { margin: 0 0 25px 0; font-size: 20px; color: #10b981; border-bottom: 2px solid #10b981; padding-bottom: 10px; }
         h3 { font-size: 16px; color: #475569; margin-top: 20px; border-left: 4px solid #10b981; padding-left: 10px; }
+        
+        /* --- Forms & Inputs --- */
         .input-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; color: #475569; font-size: 13px; }
         input { width: 100%; box-sizing: border-box; border: 1.5px solid #cbd5e1; border-radius: 10px; padding: 10px; font-size: 14px; outline: none; }
         input:focus { border-color: #10b981; }
         hr { border: 0; border-top: 1.5px solid #e2e8f0; margin: 20px 0; }
+
+        /* --- Buttons --- */
         .button-container { display: flex; gap: 15px; margin-top: 30px; }
         button { flex: 1; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s; }
         .btn-cancel { background-color: #94a3b8; color: white; }
         .btn-save { background-color: #10b981; color: white; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -52,7 +81,7 @@
         
         <div class="button-container">
             <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
-            <button class="btn-save" onclick="saveProfile()">Save Student</button>
+            <button class="btn-save" id="save-btn" onclick="saveProfile()">Save Student</button>
         </div>
     </div>
 
@@ -60,51 +89,63 @@
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
 
     <script>
-        // The Security Guard
+        // Security check
         if (localStorage.getItem('isLoggedIn') !== 'true') {
             alert("Unauthorized Access! Please log in first.");
             window.location.href = 'index.html';
         }
 
-        // 2. Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBRTIjVzxF25XURIqR6kx8TYJXFTXmqeMU",
             authDomain: "health-care-c5fe3.firebaseapp.com",
             projectId: "health-care-c5fe3",
             storageBucket: "health-care-c5fe3.firebasestorage.app",
             messagingSenderId: "104419019360",
-            appId: "1:104419019360:web:fbd745b50a3d65d7d65105",
-            measurementId: "G-MBETSFCGR3"
+            appId: "1:104419019360:web:fbd745b50a3d65d7d65105"
         };
-
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Helper to convert images to strings
-        const toBase64 = file => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
+        /* --- Image Compressing Section --- */
+        function compressImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 400; // Resize to 400px wide
+                        const scale = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scale;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Convert to high-efficiency JPEG (Quality: 0.7)
+                        resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                    };
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
 
         async function saveProfile() {
             const name = document.getElementById('add-name').value;
             const className = document.getElementById('add-class').value;
+            const saveBtn = document.getElementById('save-btn');
             
             if (!name || !className) {
                 alert("Please enter at least the student's name and class.");
                 return;
             }
 
-            // Show a "Saving" state
-            const saveBtn = document.querySelector('button');
             saveBtn.innerText = "Saving to Cloud...";
             saveBtn.disabled = true;
 
             try {
-                // Build the student object
                 const newStudent = {
                     name: name,
                     class: className,
@@ -131,30 +172,26 @@
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
-                // Process Images
+                // Apply compression to each photo upload
                 const sFile = document.getElementById('add-pic-student').files[0];
-                if (sFile) newStudent.studentPic = await toBase64(sFile);
+                if (sFile) newStudent.studentPic = await compressImage(sFile);
                 
                 const p1File = document.getElementById('p1-pic').files[0];
-                if (p1File) newStudent.parents[0].pic = await toBase64(p1File);
+                if (p1File) newStudent.parents[0].pic = await compressImage(p1File);
 
                 const p2File = document.getElementById('p2-pic').files[0];
-                if (p2File) newStudent.parents[1].pic = await toBase64(p2File);
+                if (p2File) newStudent.parents[1].pic = await compressImage(p2File);
 
-                // --- FIREBASE SAVE ---
-                // We use the name as the Document ID so it's easy to find
                 await db.collection("students").doc(name).set(newStudent);
-
-                // We still keep this so the next page knows who we just added
                 localStorage.setItem('currentStudentName', name);
 
-                alert("Student Profile added to Cloud successfully!");
+                alert("Student Profile added successfully!");
                 window.location.href = 'student-profile.html';
 
             } catch (error) {
-                console.error("Error saving to Firebase:", error);
-                alert("Error saving profile. Check console for details.");
-                saveBtn.innerText = "Save Student Profile";
+                console.error("Firebase Error:", error);
+                alert("Failed to add profile. Check your connection.");
+                saveBtn.innerText = "Save Student";
                 saveBtn.disabled = false;
             }
         }
