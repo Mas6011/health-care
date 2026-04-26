@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="manifest" href="../manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report - SMK CERIA HEALTH CARE</title>
     <style>
-        /* Base styles consistent with ../index.html */
+        /* Base styles consistent with dashboard.html */
         body {
             font-family: Arial, Helvetica, sans-serif;
             display: flex;
@@ -19,11 +20,14 @@
         .report-container {
             background-color: white;
             padding: 30px;
-            width: 800px;
+            width: 90%;
+            max-width: 800px;
+            box-sizing: border-box;
             border-radius: 20px;
             border: 2px solid #cbd5e1;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             position: relative;
+            margin: 20px auto;
         }
 
         h2 {
@@ -90,11 +94,17 @@
         }
 
         /* --- MODERN TABLE STYLES --- */
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 20px;
+        }
+
         table {
             width: 100%;
+            min-width: 650px;
             border-collapse: separate;
             border-spacing: 0;
-            margin-top: 20px;
             border: 1.5px solid #cbd5e1;
             border-radius: 15px;
             overflow: hidden;
@@ -124,11 +134,13 @@
             text-decoration: none;
             color: black;
             font-size: 20px;
+            min-width: 45px;
+            min-height: 45px;
         }
 
-        .icon-btn:hover { border-color: #3b82f6; background-color: #eff6ff; }
+        .icon-btn:hover { border-color: #3b82f6; background-color: #eff6ff; animation-name: jump; animation-duration: 0.4s; animation-fill-mode: both; }
         .btn-small { width: 45px; height: 45px; }
-        .btn-large { width: 70px; height: 55px; }
+        .btn-large { width: 65px; height: 50px; }
         .btn-danger-hover:hover { border-color: #ef4444; background-color: #fef2f2; }
 
         /* Tooltip logic */
@@ -151,6 +163,18 @@
             z-index: 1000; /* Ensures it stays on top of other elements */
         }
 
+        .footer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; gap: 10px; flex-wrap: wrap; }
+        .left-group, .right-group { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        @media (max-width: 620px) {
+            .report-container { padding: 20px; }
+            .table-wrapper { margin-top: 14px; }
+            table { min-width: 520px; }
+            .footer-actions { flex-direction: column; align-items: stretch; }
+            .left-group, .right-group { justify-content: space-between; width: 100%; }
+            .btn-large { width: 48%; height: 48px; }
+        }
+
         .icon-btn:hover::after { 
             opacity: 1; 
         }
@@ -162,26 +186,26 @@
             width: 60px; /* Give the cell a bit more specific width */
         }
 
-/* Update the table to allow tooltips to overflow the top/bottom */
         #reportTable {
             width: 100%;
+            min-width: 650px;
             border-collapse: separate;
             border-spacing: 0;
-            margin-top: 20px;
             border: 1.5px solid #cbd5e1;
             border-radius: 15px;
-            overflow: visible; /* Changed from hidden to visible */
+            overflow: visible;
         }
-        /* Ensure the first and last rows keep the rounded corners of the table */
         #reportTable tr:first-child th:first-child { border-top-left-radius: 15px; }
         #reportTable tr:first-child th:last-child { border-top-right-radius: 15px; }
         #reportTable tr:last-child td:first-child { border-bottom-left-radius: 15px; }
         #reportTable tr:last-child td:last-child { border-bottom-right-radius: 15px; }
         
-        .footer-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 40px; }
-        .left-group, .right-group { display: flex; gap: 15px; }
-        
         #no-records { text-align: center; padding: 60px; color: #94a3b8; display: none; }
+
+        @keyframes jump {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
 
         /* MODAL STYLE (Matching Profile Calling Modal) */
         .modal-overlay {
@@ -291,18 +315,20 @@
         <div class="log-title-styled"><span>💊</span> Medication History Log</div>
     </div>
 
-    <table id="reportTable">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Medicine taken</th>
-                <th>Amount</th>
-                <th class="action-cell"></th>
-            </tr>
-        </thead>
-        <tbody id="recordBody"></tbody>
-    </table>
+    <div class="table-wrapper">
+        <table id="reportTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Medicine taken</th>
+                    <th>Amount</th>
+                    <th class="action-cell"></th>
+                </tr>
+            </thead>
+            <tbody id="recordBody"></tbody>
+        </table>
+    </div>
 
     <div id="no-records">No records</div>
 
@@ -327,40 +353,94 @@
     </div>
 </div>
 
-<script>
-    const currentName = localStorage.getItem('currentStudentName');
-    const studentList = JSON.parse(localStorage.getItem('allStudents')) || [];
-    const student = studentList.find(s => s.name === currentName);
-    const storageKey = `medRecords_${currentName}`;
-    let medRecords = JSON.parse(localStorage.getItem(storageKey)) || [];
+<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
 
+<script>
+
+    // The Security Guard
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+        alert("Unauthorized Access! Please log in first.");
+        window.location.href = '../index.html';
+    }
+
+    // 2. Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBRTIjVzxF25XURIqR6kx8TYJXFTXmqeMU",
+        authDomain: "health-care-c5fe3.firebaseapp.com",
+        projectId: "health-care-c5fe3",
+        storageBucket: "health-care-c5fe3.firebasestorage.app",
+        messagingSenderId: "104419019360",
+        appId: "1:104419019360:web:fbd745b50a3d65d7d65105",
+        measurementId: "G-MBETSFCGR3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const currentName = localStorage.getItem('currentStudentName');
+    let medRecords = [];
     let pendingDeleteType = null;
     let pendingDeleteId = null;
 
-    if (student) {
-        document.getElementById('studentNameDisplay').innerText = student.name;
-        document.getElementById('pName').innerText = student.name;
-        document.getElementById('pClass').innerText = student.class;
-        document.getElementById('pIC').innerText = student.icNumber || "-";
-        document.getElementById('pHistory').innerText = student.history;
-        document.getElementById('pAllergy').innerText = student.allergy;
-        if (student.studentPic) document.getElementById('pStudentPhoto').innerHTML = `<img src="${student.studentPic}">`;
-
-        if(student.parents) {
-            student.parents.forEach((parent, index) => {
-                const prefix = index === 0 ? "p1" : "p2";
-                if(document.getElementById(`${prefix}Name`)) {
-                    document.getElementById(`${prefix}Name`).innerText = parent.name || "N/A";
-                    document.getElementById(`${prefix}Phone`).innerText = parent.phone || "N/A";
-                    document.getElementById(`${prefix}IC`).innerText = parent.ic || "N/A";
-                    document.getElementById(`${prefix}Rel`).innerText = parent.rel || "Guardian";
-                    if(parent.pic) document.getElementById(`${prefix}Photo`).innerHTML = `<img src="${parent.pic}">`;
-                }
-            });
+    window.onload = async function() {
+        if (!currentName) {
+            window.location.href = 'dashboard.html';
+            return;
         }
-        renderRecords();
+
+        document.getElementById('studentNameDisplay').innerText = currentName;
+        await loadStudentInfo(); // Loads the top info section for printing
+        await fetchRecords();    // Loads the table logs
+    };
+
+    // Fetches the student profile details for the Print Layout
+    async function loadStudentInfo() {
+        const doc = await db.collection("students").doc(currentName).get();
+        if (doc.exists) {
+            const student = doc.data();
+            document.getElementById('pName').innerText = student.name;
+            document.getElementById('pClass').innerText = student.class;
+            document.getElementById('pIC').innerText = student.icNumber || "-";
+            document.getElementById('pHistory').innerText = student.history;
+            document.getElementById('pAllergy').innerText = student.allergy;
+            if (student.studentPic) document.getElementById('pStudentPhoto').innerHTML = `<img src="${student.studentPic}">`;
+
+            if(student.parents) {
+                student.parents.forEach((parent, index) => {
+                    const prefix = index === 0 ? "p1" : "p2";
+                    if(document.getElementById(`${prefix}Name`)) {
+                        document.getElementById(`${prefix}Name`).innerText = parent.name || "N/A";
+                        document.getElementById(`${prefix}Phone`).innerText = parent.phone || "N/A";
+                        document.getElementById(`${prefix}IC`).innerText = parent.ic || "N/A";
+                        document.getElementById(`${prefix}Rel`).innerText = parent.rel || "Guardian";
+                        if(parent.pic) document.getElementById(`${prefix}Photo`).innerHTML = `<img src="${parent.pic}">`;
+                    }
+                });
+            }
+        }
     }
 
+    // Fetches all medication logs for this specific student
+    async function fetchRecords() {
+        try {
+            // Ensure studentName has a capital N
+            const snapshot = await db.collection("medication_logs")
+                .where("studentName", "==", currentName) 
+                .get();
+
+            medRecords = [];
+            snapshot.forEach(doc => {
+                // This pulls the data from the cloud into your local array
+                medRecords.push({ id: doc.id, ...doc.data() });
+            });
+            
+            console.log("Records found:", medRecords.length); // Check your browser console for this
+            renderRecords();
+        } catch (error) {
+            console.error("Error fetching records:", error);
+        }
+    }
     function renderRecords() {
         const body = document.getElementById('recordBody');
         body.innerHTML = ''; 
@@ -369,10 +449,10 @@
                 <tr>
                     <td>${rec.date}</td>
                     <td>${rec.time}</td>
-                    <td>${rec.name}</td>
-                    <td>${rec.amount}</td>
+                    <td>${rec.medicineName}</td>
+                    <td>${rec.dosage}</td>
                     <td class="action-cell" style="text-align: right;">
-                        <button class="icon-btn btn-small btn-danger-hover" data-tooltip="Delete record" onclick="openDeleteModal('single', ${rec.id})">🗑️</button>
+                        <button class="icon-btn btn-small btn-danger-hover" data-tooltip="Delete record" onclick="openDeleteModal('single', '${rec.id}')">🗑️</button>
                     </td>
                 </tr>
             `;
@@ -381,7 +461,7 @@
         checkRecords();
     }
 
-    // Modal Logic
+    // Modal logic updated for Firebase deletion
     function openDeleteModal(type, id = null) {
         pendingDeleteType = type;
         pendingDeleteId = id;
@@ -392,14 +472,16 @@
         document.getElementById('modalMsg').innerText = msg;
         document.getElementById('deleteModal').style.display = 'flex';
         
-        document.getElementById('confirmBtn').onclick = () => {
+        document.getElementById('confirmBtn').onclick = async () => {
             if(pendingDeleteType === 'all') {
-                medRecords = [];
+                const snapshot = await db.collection("medication_logs").where("studentName", "==", currentName).get();
+                const batch = db.batch();
+                snapshot.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
             } else {
-                medRecords = medRecords.filter(r => r.id !== pendingDeleteId);
+                await db.collection("medication_logs").doc(pendingDeleteId).delete();
             }
-            localStorage.setItem(storageKey, JSON.stringify(medRecords));
-            renderRecords();
+            await fetchRecords();
             closeModal();
         };
     }
